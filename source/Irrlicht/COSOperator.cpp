@@ -56,7 +56,8 @@ const core::stringc& COSOperator::getOperatingSystemVersion() const
 //! copies text to the clipboard
 void COSOperator::copyToClipboard(const c16* text) const
 {
-	if (wcslen(text)==0)
+	size_t len = wcslen(text);
+	if (len==0)
 		return;
 
 // Windows version
@@ -70,7 +71,7 @@ void COSOperator::copyToClipboard(const c16* text) const
 	HGLOBAL clipbuffer;
 	wchar_t * buffer;
 
-	clipbuffer = GlobalAlloc(GMEM_DDESHARE, sizeof(wchar_t) * (wcslen(text) + 1));
+	clipbuffer = GlobalAlloc(GMEM_DDESHARE, sizeof(wchar_t) * (len + 1));
 	buffer = (wchar_t*)GlobalLock(clipbuffer);
 
 	wcscpy(buffer, text);
@@ -86,7 +87,12 @@ void COSOperator::copyToClipboard(const c16* text) const
 
 #elif defined(_IRR_COMPILE_WITH_X11_DEVICE_)
     if ( IrrDeviceLinux )
-        IrrDeviceLinux->copyToClipboard(text);
+	{
+		char ctext[len*2 + 1];
+		size_t lenNew = wcstombs(ctext, text, len*2);
+		ctext[lenNew] = 0;
+        IrrDeviceLinux->copyToClipboard(ctext);
+	}
 #else
 
 #endif
@@ -116,7 +122,14 @@ const c16* COSOperator::getTextFromClipboard() const
 
 #elif defined(_IRR_COMPILE_WITH_X11_DEVICE_)
     if ( IrrDeviceLinux )
-        return IrrDeviceLinux->getTextFromClipboard();
+	{
+		const c8 * p = IrrDeviceLinux->getTextFromClipboard();
+		size_t lenOld = strlen(p);
+		wchar_t *ws = new wchar_t[lenOld + 1];
+		size_t lenNew = mbstowcs(ws,p,lenOld);
+		ws[lenNew] = 0;
+        return ws;
+	}
     return 0;
 
 #else
