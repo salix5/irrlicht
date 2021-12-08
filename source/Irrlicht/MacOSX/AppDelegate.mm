@@ -74,6 +74,35 @@
 	return (_quit);
 }
 
+- (void)keyDown:(NSEvent *)event
+{
+	[self interpretKeyEvents:@[event]];
+}
+
+- (void)insertText:(id)string
+{
+	[self setString: @""];
+	if ([string isKindOfClass:[NSAttributedString class]])
+	{
+		_device->handleInputEvent([[string string] UTF8String]);
+	}
+	else
+	{
+		_device->handleInputEvent([string UTF8String]);
+	}
+}
+
+- (void)doCommandBySelector:(SEL)selector
+{
+	_device->processKeyEvent();
+}
+
+- (void)paste:(id)sender
+{
+	// TODO: pass the pasted string. Now we discard it otherwise it will be kept in the editbox.
+	[self setString: @""];
+}
+
 @end
 
 #endif // _IRR_COMPILE_WITH_OSX_DEVICE_
