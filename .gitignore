@@ -1,2 +1,4 @@
 .DS_Store
 /source/Irrlicht/MacOSX/build
+/irrlicht.patch
+/premake5.lua
