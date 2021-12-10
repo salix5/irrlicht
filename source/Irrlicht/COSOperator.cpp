@@ -98,7 +98,7 @@ void COSOperator::copyToClipboard(const c16* text) const
 		ctext[lenNew] = 0;
 		setlocale(LC_CTYPE, oldLocale);
 
-        IrrDeviceLinux->copyToClipboard(ctext);
+		IrrDeviceLinux->copyToClipboard(ctext);
 	}
 #else
 
@@ -137,7 +137,7 @@ const c16* COSOperator::getTextFromClipboard() const
 		wchar_t* ws = core::toWideChar(p);
 		setlocale(LC_CTYPE, oldLocale);
 
-        return ws;
+		return ws;
 	}
     return 0;
 
