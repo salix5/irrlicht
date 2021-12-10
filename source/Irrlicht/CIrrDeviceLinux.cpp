@@ -1107,11 +1107,14 @@ bool CIrrDeviceLinux::run()
 				{
 					XEvent respond;
 					XSelectionRequestEvent *req = &(event.xselectionrequest);
-					if (  req->target == XA_STRING)
+					if ( req->target == XA_STRING
+						|| req->target == X_ATOM_TEXT
+						|| req->target == X_ATOM_UTF8_STRING )
 					{
 						XChangeProperty (display,
 								req->requestor,
-								req->property, req->target,
+								req->property,
+								req->target == X_ATOM_TEXT ? XA_STRING : req->target,
 								8, // format
 								PropModeReplace,
 								(unsigned char*) Clipboard.c_str(),
@@ -1125,11 +1128,14 @@ bool CIrrDeviceLinux::run()
 						data[0] = X_ATOM_TEXT;
 						data[1] = XA_STRING;
 
-						XChangeProperty (display, req->requestor,
-								req->property, req->target,
-								8, PropModeReplace,
-								(unsigned char *) &data,
-								sizeof (data));
+						XChangeProperty (display,
+								req->requestor,
+								req->property,
+								XA_ATOM,
+								32, // format
+								PropModeReplace,
+								(unsigned char *) &X_ATOM_UTF8_STRING,
+								1);
 						respond.xselection.property = req->property;
 					}
 					else

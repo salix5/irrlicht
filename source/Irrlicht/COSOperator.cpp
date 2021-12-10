@@ -89,9 +89,15 @@ void COSOperator::copyToClipboard(const c16* text) const
 #elif defined(_IRR_COMPILE_WITH_X11_DEVICE_)
     if ( IrrDeviceLinux )
 	{
-		char ctext[len*2 + 1];
-		size_t lenNew = wcstombs(ctext, text, len*2);
+		size_t wlen = sizeof(wchar_t) * (len + 1);
+		char ctext[wlen];
+
+		char* oldLocale = setlocale(LC_CTYPE, NULL);
+		setlocale(LC_CTYPE, "");
+		size_t lenNew = wcstombs(ctext, text, wlen);
 		ctext[lenNew] = 0;
+		setlocale(LC_CTYPE, oldLocale);
+
         IrrDeviceLinux->copyToClipboard(ctext);
 	}
 #else
