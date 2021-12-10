@@ -602,14 +602,7 @@ void CIrrDeviceMacOSX::processKeyEvent()
 void CIrrDeviceMacOSX::handleInputEvent(const char *cStr)
 {
 	SEvent ievent;
-
-	// TODO: we should have such a function in core::string
-	size_t lenOld = strlen(cStr);
-	wchar_t *ws = new wchar_t[lenOld + 1];
-	size_t len = mbstowcs(ws,cStr,lenOld);
-	ws[len] = 0;
-	irr::core::stringw widep(ws);
-	delete[] ws;
+	irr::core::stringw widep(irr::core::toWideChar(cStr));
 
 	ievent.EventType = irr::EET_KEY_INPUT_EVENT;
 	ievent.KeyInput.Key = (irr::EKEY_CODE)0;

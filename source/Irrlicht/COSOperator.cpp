@@ -9,6 +9,7 @@
 #include <windows.h>
 #endif
 #else
+#include <locale.h>
 #include <string.h>
 #include <unistd.h>
 #ifndef _IRR_SOLARIS_PLATFORM_
@@ -124,10 +125,12 @@ const c16* COSOperator::getTextFromClipboard() const
     if ( IrrDeviceLinux )
 	{
 		const c8 * p = IrrDeviceLinux->getTextFromClipboard();
-		size_t lenOld = strlen(p);
-		wchar_t *ws = new wchar_t[lenOld + 1];
-		size_t lenNew = mbstowcs(ws,p,lenOld);
-		ws[lenNew] = 0;
+
+		char* oldLocale = setlocale(LC_CTYPE, NULL);
+		setlocale(LC_CTYPE, "");
+		wchar_t* ws = core::toWideChar(p);
+		setlocale(LC_CTYPE, oldLocale);
+
         return ws;
 	}
     return 0;

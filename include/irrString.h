@@ -1360,6 +1360,15 @@ typedef string<c8> stringc;
 //! Typedef for wide character strings
 typedef string<wchar_t> stringw;
 
+//! wrap of mbstowcs
+static inline wchar_t* toWideChar(const char* p)
+{
+	size_t lenOld = strlen(p);
+	wchar_t* ws = new wchar_t[lenOld + 1];
+	size_t lenNew = mbstowcs(ws, p, lenOld);
+	ws[lenNew] = 0;
+	return ws;
+}
 
 } // end namespace core
 } // end namespace irr
