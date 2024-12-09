@@ -345,7 +345,7 @@ tool <http://developer.nvidia.com/object/nvperfhud_home.html>. */
 //! Define _IRR_COMPILE_WITH_SKINNED_MESH_SUPPORT_ if you want to use bone based
 /** animated meshes. If you compile without this, you will be unable to load
 B3D, MS3D or X meshes */
-#define _IRR_COMPILE_WITH_SKINNED_MESH_SUPPORT_
+//#define _IRR_COMPILE_WITH_SKINNED_MESH_SUPPORT_
 #ifdef NO_IRR_COMPILE_WITH_SKINNED_MESH_SUPPORT_
 #undef _IRR_COMPILE_WITH_SKINNED_MESH_SUPPORT_
 #endif
@@ -374,7 +374,7 @@ B3D, MS3D or X meshes */
 #endif	// _IRR_COMPILE_WITH_SKINNED_MESH_SUPPORT_
 
 //! Define _IRR_COMPILE_WITH_IRR_MESH_LOADER_ if you want to load Irrlicht Engine .irrmesh files
-#define _IRR_COMPILE_WITH_IRR_MESH_LOADER_
+/*#define _IRR_COMPILE_WITH_IRR_MESH_LOADER_
 #ifdef NO_IRR_COMPILE_WITH_IRR_MESH_LOADER_
 #undef _IRR_COMPILE_WITH_IRR_MESH_LOADER_
 #endif
@@ -484,6 +484,7 @@ B3D, MS3D or X meshes */
 #ifdef NO_IRR_COMPILE_WITH_PLY_WRITER_
 #undef _IRR_COMPILE_WITH_PLY_WRITER_
 #endif
+*/
 
 //! Define _IRR_COMPILE_WITH_BMP_LOADER_ if you want to load .bmp files
 //! Disabling this loader will also disable the built-in font
@@ -527,17 +528,17 @@ B3D, MS3D or X meshes */
 #undef _IRR_COMPILE_WITH_DDS_LOADER_
 #endif
 //! Define _IRR_COMPILE_WITH_TGA_LOADER_ if you want to load .tga files
-#define _IRR_COMPILE_WITH_TGA_LOADER_
+//#define _IRR_COMPILE_WITH_TGA_LOADER_
 #ifdef NO_IRR_COMPILE_WITH_TGA_LOADER_
 #undef _IRR_COMPILE_WITH_TGA_LOADER_
 #endif
 //! Define _IRR_COMPILE_WITH_WAL_LOADER_ if you want to load .wal files
-#define _IRR_COMPILE_WITH_WAL_LOADER_
+//#define _IRR_COMPILE_WITH_WAL_LOADER_
 #ifdef NO_IRR_COMPILE_WITH_WAL_LOADER_
 #undef _IRR_COMPILE_WITH_WAL_LOADER_
 #endif
 //! Define _IRR_COMPILE_WITH_LMP_LOADER_ if you want to load .lmp files
-#define _IRR_COMPILE_WITH_LMP_LOADER_
+//#define _IRR_COMPILE_WITH_LMP_LOADER_
 #ifdef NO_IRR_COMPILE_WITH_LMP_LOADER_
 #undef _IRR_COMPILE_WITH_LMP_LOADER_
 #endif
@@ -578,7 +579,7 @@ B3D, MS3D or X meshes */
 #undef _IRR_COMPILE_WITH_PSD_WRITER_
 #endif
 //! Define _IRR_COMPILE_WITH_TGA_WRITER_ if you want to write .tga files
-#define _IRR_COMPILE_WITH_TGA_WRITER_
+//#define _IRR_COMPILE_WITH_TGA_WRITER_
 #ifdef NO_IRR_COMPILE_WITH_TGA_WRITER_
 #undef _IRR_COMPILE_WITH_TGA_WRITER_
 #endif
