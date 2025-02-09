@@ -4,4 +4,4 @@
 /source/Irrlicht/MacOSX/MacOSX.xcodeproj/xcuserdata
 /bin/MacOSX
 /irrlicht.patch
-/premake5.lua
+/premake*.lua
