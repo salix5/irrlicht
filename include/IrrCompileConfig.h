@@ -497,7 +497,7 @@ B3D, MS3D or X meshes */
 #undef _IRR_COMPILE_WITH_JPG_LOADER_
 #endif
 //! Define _IRR_COMPILE_WITH_PCX_LOADER_ if you want to load .pcx files
-#define _IRR_COMPILE_WITH_PCX_LOADER_
+//#define _IRR_COMPILE_WITH_PCX_LOADER_
 #ifdef NO_IRR_COMPILE_WITH_PCX_LOADER_
 #undef _IRR_COMPILE_WITH_PCX_LOADER_
 #endif
@@ -507,7 +507,7 @@ B3D, MS3D or X meshes */
 #undef _IRR_COMPILE_WITH_PNG_LOADER_
 #endif
 //! Define _IRR_COMPILE_WITH_PPM_LOADER_ if you want to load .ppm/.pgm/.pbm files
-#define _IRR_COMPILE_WITH_PPM_LOADER_
+//#define _IRR_COMPILE_WITH_PPM_LOADER_
 #ifdef NO_IRR_COMPILE_WITH_PPM_LOADER_
 #undef _IRR_COMPILE_WITH_PPM_LOADER_
 #endif
@@ -558,7 +558,7 @@ B3D, MS3D or X meshes */
 #undef _IRR_COMPILE_WITH_JPG_WRITER_
 #endif
 //! Define _IRR_COMPILE_WITH_PCX_WRITER_ if you want to write .pcx files
-#define _IRR_COMPILE_WITH_PCX_WRITER_
+//#define _IRR_COMPILE_WITH_PCX_WRITER_
 #ifdef NO_IRR_COMPILE_WITH_PCX_WRITER_
 #undef _IRR_COMPILE_WITH_PCX_WRITER_
 #endif
@@ -568,7 +568,7 @@ B3D, MS3D or X meshes */
 #undef _IRR_COMPILE_WITH_PNG_WRITER_
 #endif
 //! Define _IRR_COMPILE_WITH_PPM_WRITER_ if you want to write .ppm files
-#define _IRR_COMPILE_WITH_PPM_WRITER_
+//#define _IRR_COMPILE_WITH_PPM_WRITER_
 #ifdef NO_IRR_COMPILE_WITH_PPM_WRITER_
 #undef _IRR_COMPILE_WITH_PPM_WRITER_
 #endif
