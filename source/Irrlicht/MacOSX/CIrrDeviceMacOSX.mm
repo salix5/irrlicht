@@ -1024,13 +1024,13 @@ bool CIrrDeviceMacOSX::run()
 		auto frameHeight = [[textView superview] frame].size.height;
 		NSRect rect = {
 			(frameHeight - crect.LowerRightCorner.Y > crect.getHeight()) ?
-				crect.UpperLeftCorner.X :
-				crect.UpperLeftCorner.X + crect.getWidth() / 2,
+				(CGFloat)crect.UpperLeftCorner.X :
+				(CGFloat)(crect.UpperLeftCorner.X + crect.getWidth() / 2),
 			(frameHeight - crect.LowerRightCorner.Y > crect.getHeight()) ?
-				frameHeight - crect.LowerRightCorner.Y - crect.getHeight() - 1 :
-				frameHeight - crect.LowerRightCorner.Y,
-			crect.getWidth() / 2,
-			crect.getHeight(),
+				(CGFloat)(frameHeight - crect.LowerRightCorner.Y - crect.getHeight() - 1) :
+				(CGFloat)(frameHeight - crect.LowerRightCorner.Y),
+			(CGFloat)(crect.getWidth() / 2),
+			(CGFloat)crect.getHeight(),
 		};
 		[textView setFrame:rect];
 		[textView setHidden:NO];
