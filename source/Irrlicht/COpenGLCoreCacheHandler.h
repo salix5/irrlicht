@@ -415,7 +415,7 @@ public:
 
 	// Color Mask.
 
-	void getColorMask(u8& mask)
+	void getColorMask(u8& mask) const
 	{
 		mask = ColorMask[0];
 	}
@@ -470,6 +470,11 @@ public:
 
 	// Depth calls.
 
+	void getDepthFunc(GLenum& mode) const
+	{
+		mode = DepthFunc;
+	}
+
 	void setDepthFunc(GLenum mode)
 	{
 		if (DepthFunc != mode)
@@ -479,7 +484,7 @@ public:
 		}
 	}
 
-	void getDepthMask(bool& depth)
+	void getDepthMask(bool& depth) const
 	{
 		depth = DepthMask;
 	}
@@ -497,7 +502,7 @@ public:
 		}
 	}
 
-    void getDepthTest(bool& enable)
+    void getDepthTest(bool& enable) const
     {
         enable = DepthTest;
     }
