@@ -1,6 +1,11 @@
 --------------------------
 Changes in 1.9 (not yet released)
 
+- irr::core::rect::isPointInside no longer considers right-bottom point as inside. See https://irrlicht.sourceforge.io/forum//viewtopic.php?t=43914 
+  This also changes IGUIElement::isPointInside the same way.
+  It fixes some related bugs (like for example combobox often resetting position accidentally).
+  It might cause some trouble if people don't expect the changed behaviour, but it seemed old behaviour caused more bugs as the old implementation 
+  was simply not fitting the behaviour of the other functions in this class (they already excluded right-bottom elements)
 - ComboBox now marks all mouse-wheel events as handled and not just when selection changes as before
 - string::insert now expects template type instead of always char. Breaks compiling code when it was previously used with stringw's. Use wchar_t's now to insert into those.
 - Add flag irr::gui::EFF_HOVERED_HANDLES_UNFOCUSED_MOUSE_EVENTS. Keeping old behavior, but it can be disabled now.
