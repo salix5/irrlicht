@@ -740,8 +740,8 @@ int main()
 							memcpy(tData, rtData, dynamicCubeMapTex->getPitch()*dynamicCubeMapTex->getSize().Width);
 							dynamicCubeMapRTT_intermediate->unlock();
 							dynamicCubeMapTex->unlock();
-							dynamicCubeMapTex->regenerateMipMapLevels();
 						}
+						dynamicCubeMapTex->regenerateMipMapLevels();
 					}
 					sphereNode3->setVisible(true);
 				}
