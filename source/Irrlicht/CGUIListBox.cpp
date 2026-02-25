@@ -326,7 +326,6 @@ bool CGUIListBox::OnEvent(const SEvent& event)
 
 				// find the selected item, starting at the current selection
 				s32 start = Selected;
-				s32 oldSelected = Selected;
 				// dont change selection if the key buffer matches the current item
 				if (Selected > -1 && KeyBuffer.size() > 1)
 				{
@@ -342,8 +341,7 @@ bool CGUIListBox::OnEvent(const SEvent& event)
 					{
 						if (KeyBuffer.equals_ignore_case(Items[current].text.subString(0,KeyBuffer.size())))
 						{
-							setSelected(current);
-							if (Parent && oldSelected != current && !Selecting && !MoveOverSelect)
+							if (Parent && Selected != current && !Selecting && !MoveOverSelect)
 							{
 								SEvent e;
 								e.EventType = EET_GUI_EVENT;
@@ -352,6 +350,7 @@ bool CGUIListBox::OnEvent(const SEvent& event)
 								e.GUIEvent.EventType = EGET_LISTBOX_CHANGED;
 								Parent->OnEvent(e);
 							}
+							setSelected(current);
 							return true;
 						}
 					}
@@ -362,8 +361,7 @@ bool CGUIListBox::OnEvent(const SEvent& event)
 					{
 						if (KeyBuffer.equals_ignore_case(Items[current].text.subString(0,KeyBuffer.size())))
 						{
-							setSelected(current);
-							if (Parent && oldSelected != current && !Selecting && !MoveOverSelect)
+							if (Parent && Selected != current && !Selecting && !MoveOverSelect)
 							{
 								Selected = current;
 								SEvent e;
@@ -373,6 +371,7 @@ bool CGUIListBox::OnEvent(const SEvent& event)
 								e.GUIEvent.EventType = EGET_LISTBOX_CHANGED;
 								Parent->OnEvent(e);
 							}
+							setSelected(current);
 							return true;
 						}
 					}
