@@ -458,6 +458,15 @@ Changes in 1.9 (not yet released)
 - added x64 to vs2008 project ( buildAllExamples_v9 ) [paths: obj64, win64-visualstudio]
 - burningvideo: getMaxTextureSize adjusted [ changed meaning of SOFTWARE_DRIVER_2_TEXTURE_MAXSIZE
 - burningvideo: mipmaplevel adjusted ( not that bad bokeh...(sometimes) )
+- BurningVideo: 0.55 (03/2026)
+  -Environmental Cube Mapping ( Example 28.Cubemapping)
+  -Render Target Update
+  -SuperTuxKart Shader Update
+  -CBlit.h Removed dependencies from BurningsVideo
+  -Files Deleted: CBurningShader_Raster_Reference.cpp,CDepthBuffer.cpp,CDepthBuffer.h,CTRGouraud2.cpp,CTRGouraudAlphaNoZ2.cpp,CTRGouraudNoZ2.cpp,IDepthBuffer.h
+  -Files Added: burning_shader_glsl_emu_define.h,burning_shader_glsl_emu_undefine.h
+  -Visual Studio Project Files, makefile updated
+
 
 --------------------------
 Changes in 1.8.6

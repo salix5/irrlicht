@@ -476,6 +476,7 @@ int main()
 				break;
 
 			case video::EDT_OPENGL:
+			case video::EDT_BURNINGSVIDEO:
 				vsFileName = mediaPath + "cubeMapReflection.vert";
 				psFileName = mediaPath + "cubeMapReflection.frag";
 				break;
