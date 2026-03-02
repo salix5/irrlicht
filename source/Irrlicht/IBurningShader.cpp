@@ -623,7 +623,7 @@ void getSample_texture(tFixPoint& a,
 #endif // defined(SOFTWARE_DRIVER_2_BILINEAR)
 
 
-#if !defined(burning_glsl_emu_test)
+#if !defined(burning_glsl_emu_test) && 0
 sVec4 BL_Sampler_nearest(const int sampler, const sVec4& coord, const s32 coord_count, const SBurningShaderMaterial* MaterialLink)
 {
 	// texel
@@ -712,8 +712,8 @@ sVec4 BL_Sampler_nearest(const int sampler, const sVec4& coord, const s32 coord_
 		uv.y = coord.y * line.inversew[0];
 		BL_textureWrap(uv, texObj);
 
-
-#if 1
+		// mimap selection
+#if 1  
 		//dFdx ( next line.ipol_step() )
 		sVec2 uv2;
 		uv2.x = (coord.x + line.t[0][1].x) * line.inversew[1];
@@ -1228,7 +1228,9 @@ void glslEmu::OnSetMaterial_BL(const SBurningShaderMaterial& material)
 	glsl.MaterialLink = &material;
 
 	if (material.FragmentShader.id == BFT_IRR_0342_0x11b0394b) fragmentShader = &glslEmu::frag_BFT_IRR_0342_0x11b0394b;
+#if defined(PATCH_SUPERTUX_8_0_1_with_1_9_0_Shader)
 	else if (material.FragmentShader.id == BFT_STK_1612_0x1e372102) fragmentShader = &glslEmu::frag_BFT_STK_1612_0x1e372102;
+#endif
 	else fragmentShader = &glslEmu::frag_default;
 #endif
 

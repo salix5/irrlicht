@@ -299,13 +299,6 @@ struct ALIGN(16) sVec4
 		return sVec4(x * vs, y * vs, z * vs, w * vs);
 	}
 
-#if defined(burning_glsl_emu_test)
-	sVec4 operator*(const f64 vs) const
-	{
-		return sVec4((f32)(x * vs), (f32)(y * vs), (f32)(z * vs), (f32)(w * vs));
-	}
-#endif
-
 	sVec4 operator*(const sVec4 & other) const
 	{
 		return sVec4(x * other.x, y * other.y, z * other.z, w * other.w);
@@ -319,6 +312,14 @@ struct ALIGN(16) sVec4
 		w *= other.w;
 	}
 
+#if defined(burning_glsl_emu_test)
+	sVec4 operator*(const f64 vs) const
+	{
+		return sVec4((f32)(x * vs), (f32)(y * vs), (f32)(z * vs), (f32)(w * vs));
+	}
+
+/*
+	sVec4(const sVec4& other) : x(other.x), y(other.y), z(other.z), w(other.w) {}
 	sVec4& operator=(const sVec4 & other)
 	{
 		x = other.x;
@@ -327,6 +328,8 @@ struct ALIGN(16) sVec4
 		w = other.w;
 		return *this;
 	}
+*/
+#endif
 
 	//outside shader
 	void set(f32 _x, f32 _y, f32 _z, f32 _w)
@@ -611,6 +614,7 @@ typedef sVec4 sVec3Color;
 enum e4DVertexFlag
 {
 	VERTEX4D_CLIPMASK = 0x0000003F,
+	VERTEX4D_CLIP_INSIDE = 0,
 	VERTEX4D_CLIP_NEAR = 0x00000001,
 	VERTEX4D_CLIP_FAR = 0x00000002,
 	VERTEX4D_CLIP_LEFT = 0x00000004,

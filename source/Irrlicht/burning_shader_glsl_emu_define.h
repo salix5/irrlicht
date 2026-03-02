@@ -37,9 +37,9 @@ vec4 gl_Color;
 #elif defined(burning_shader_fragment_fix)
 sVec4Fix gl_Color;
 tFixPoint gl_TexCoord[4];
-#else
-vec4 gl_Color;
+#elif defined(burning_shader_fragment_emu)
 vec2 gl_TexCoord[2];
+#else
 #endif
 
 #define return goto BL_shader_return

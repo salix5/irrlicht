@@ -1232,12 +1232,8 @@ void CTRTextureGouraud2::frag_BFT_IRR_0342_0x11b0394b()
 
 #define burning_shader_fragment_fix
 #include "burning_shader_glsl_emu_define.h"
+irr_unreferenced_parameter(gl_Color);
 
-
-#ifdef burning_shader_fragment_fix
-	gl_Color.r;
-#else
-#endif
 
 	const CSoftwareTexture2_Bound* cubeTex_b = IT[cubeTex].Texture->getTexBound_index();
 	E_CUBE_SURFACE face;

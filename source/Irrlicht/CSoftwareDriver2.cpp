@@ -1306,14 +1306,14 @@ REALINLINE static u32 clipToFrustumTest(const s4DVertex* v)
 {
 	u32 flag = 0;
 
-	flag |= v->Pos.z <= v->Pos.w ? VERTEX4D_CLIP_NEAR : 0;
-	flag |= -v->Pos.z <= v->Pos.w ? VERTEX4D_CLIP_FAR : 0;
+	flag |= v->Pos.z <= v->Pos.w ? VERTEX4D_CLIP_NEAR : VERTEX4D_CLIP_INSIDE;
+	flag |= -v->Pos.z <= v->Pos.w ? VERTEX4D_CLIP_FAR : VERTEX4D_CLIP_INSIDE;
 
-	flag |= v->Pos.x <= v->Pos.w ? VERTEX4D_CLIP_LEFT : 0;
-	flag |= -v->Pos.x <= v->Pos.w ? VERTEX4D_CLIP_RIGHT : 0;
+	flag |= v->Pos.x <= v->Pos.w ? VERTEX4D_CLIP_LEFT : VERTEX4D_CLIP_INSIDE;
+	flag |= -v->Pos.x <= v->Pos.w ? VERTEX4D_CLIP_RIGHT : VERTEX4D_CLIP_INSIDE;
 
-	flag |= v->Pos.y <= v->Pos.w ? VERTEX4D_CLIP_BOTTOM : 0;
-	flag |= -v->Pos.y <= v->Pos.w ? VERTEX4D_CLIP_TOP : 0;
+	flag |= v->Pos.y <= v->Pos.w ? VERTEX4D_CLIP_BOTTOM : VERTEX4D_CLIP_INSIDE;
+	flag |= -v->Pos.y <= v->Pos.w ? VERTEX4D_CLIP_TOP : VERTEX4D_CLIP_INSIDE;
 
 
 	//verify with plane
@@ -2998,8 +2998,11 @@ void CBurningVideoDriver::drawVertexPrimitiveList(const void* vertices, u32 vert
 
 #if defined(burning_glsl_emu_test)
 		if (1 && VertexShader.primitiveHasVertex >= 3 &&
-			(Material.FragmentShader.id == BFT_STK_1612_0x1e372102 || 
-			 Material.FragmentShader.id == BFT_IRR_0342_0x11b0394b
+			(
+ 			 Material.FragmentShader.id == BFT_IRR_0342_0x11b0394b
+#if defined(PATCH_SUPERTUX_8_0_1_with_1_9_0_Shader)
+			 || Material.FragmentShader.id == BFT_STK_1612_0x1e372102
+#endif
 			)
 			)
 		{

@@ -845,6 +845,7 @@ void CTRTextureGouraudNoZ2::frag_BFT_STK_2971_0xd34c333c()
 	//tFixPoint ty0;
 	//tFixPoint r0, g0, b0;
 
+#define burning_shader_fragment_emu
 #include "burning_shader_glsl_emu_define.h"
 
 	// The actual boost amount (which linearly scales the blur to be shown).

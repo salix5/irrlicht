@@ -254,7 +254,9 @@ struct BurningUniform
 
 	bool operator==(const BurningUniform& other) const
 	{
-		return ((type & 3) == (other.type & 3)) && tiny_istoken(name, other.name);
+		return (
+			(type & (BL_VERTEX_PROGRAM| BL_FRAGMENT_PROGRAM)) == (other.type & (BL_VERTEX_PROGRAM | BL_FRAGMENT_PROGRAM)))
+			&& tiny_istoken(name, other.name);
 	}
 
 };
