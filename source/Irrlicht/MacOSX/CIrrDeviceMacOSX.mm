@@ -494,6 +494,7 @@ CIrrDeviceMacOSX::CIrrDeviceMacOSX(const SIrrlichtCreationParameters& param)
 		if(!CreationParams.WindowId) //load menus if standalone application
 		{
 			[[NSAutoreleasePool alloc] init];
+			[[NSApplication sharedApplication] setActivationPolicy:NSApplicationActivationPolicyRegular];
 			[[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
 			[NSApp setDelegate:(id<NSApplicationDelegate>)[[[AppDelegate alloc] initWithDevice:this] autorelease]];
 			[NSBundle loadNibNamed:@"MainMenu" owner:[NSApp delegate]];
@@ -1094,7 +1095,18 @@ bool CIrrDeviceMacOSX::run()
 
 			case NSLeftMouseDown:
 				ievent.EventType = irr::EET_MOUSE_INPUT_EVENT;
-				ievent.MouseInput.Event = irr::EMIE_LMOUSE_PRESSED_DOWN;
+				switch ([(NSEvent *)event clickCount])
+				{
+					case 2:
+						ievent.MouseInput.Event = irr::EMIE_LMOUSE_DOUBLE_CLICK;
+						break;
+					case 3:
+						ievent.MouseInput.Event = irr::EMIE_LMOUSE_TRIPLE_CLICK;
+						break;
+					default:
+						ievent.MouseInput.Event = irr::EMIE_LMOUSE_PRESSED_DOWN;
+						break;
+				}
 				MouseButtonStates |= irr::EMBSM_LEFT;
 				ievent.MouseInput.ButtonStates = MouseButtonStates;
 				postMouseEvent(event,ievent);
