@@ -217,7 +217,7 @@ void pollJoysticks()
 
 		if (!FAILED(ActiveJoysticks[joystick].lpdijoy->GetDeviceState(sizeof(info),&info)))
 		{
-			SEvent event;
+			SEvent event{};
 
 			event.EventType = irr::EET_JOYSTICK_INPUT_EVENT;
 			event.JoystickEvent.Joystick = (u8)joystick;
@@ -318,7 +318,7 @@ void pollJoysticks()
 			info.dwFlags &= ~(JOY_RETURNPOV|JOY_RETURNPOVCTS);
 		if(JOYERR_NOERROR == joyGetPosEx(ActiveJoysticks[joystick].Index, &info))
 		{
-			SEvent event;
+			SEvent event{};
 
 			event.EventType = irr::EET_JOYSTICK_INPUT_EVENT;
 			event.JoystickEvent.Joystick = (u8)joystick;
@@ -653,7 +653,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	#endif
 
 	irr::CIrrDeviceWin32* dev = 0;
-	irr::SEvent event;
+	irr::SEvent event{};
 
 	static irr::s32 ClickCount=0;
 	if (GetCapture() != hWnd && ClickCount > 0)
