@@ -33,9 +33,6 @@ typedef uint16_t		u16;
 /** This is a typedef for signed short, it ensures portability of the engine. */
 typedef int16_t		s16;
 
-//! 16 bit character variable.
-/** This is a typedef for wchar_t, it ensures portability of the engine. */
-typedef wchar_t			c16;
 
 
 //! 32 bit unsigned variable.
