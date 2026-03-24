@@ -1,6 +1,6 @@
 --------------------------
 Changes in 1.9 (not yet released)
-
+- Fix creating NSMenu with a null bundle name (macOS). Thanks @Mercury233 for patch (#331 - 4)
 - Use snprintf_irr instead of sprintf. Thanks @Mercury233 for patch (#331 - 3)
 - irr::core::rect::isPointInside no longer considers right-bottom point as inside. See https://irrlicht.sourceforge.io/forum//viewtopic.php?t=43914 
   This also changes IGUIElement::isPointInside the same way.
