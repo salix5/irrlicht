@@ -356,7 +356,7 @@ static void PHYSFS_utf8FromUcs4(const u32 *src, char *dst, u64 len)
 
 static void PHYSFS_utf8FromUcs2(const u16 *src, char *dst, u64 len)
 {
-	UTF8FROMTYPE(u64, src, dst, len);
+	UTF8FROMTYPE(u16, src, dst, len);
 } /* PHYSFS_utf8FromUcs2 */
 
 #undef UTF8FROMTYPE
