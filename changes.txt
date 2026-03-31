@@ -1,7 +1,9 @@
 --------------------------
 Changes in 1.9 (not yet released)
+- Fix utf-8 parsing. Thanks @Mercury233 for patch proposal (#331 - 12)
 - Fix creating NSMenu with a null bundle name (macOS). Thanks @Mercury233 for patch (#331 - 4)
 - Use snprintf_irr instead of sprintf. Thanks @Mercury233 for patch (#331 - 3)
+- Add ITexture::getExposedTextureData which allows accessing internal OpenGL texture names and types and D3D9 texture pointers.
 - irr::core::rect::isPointInside no longer considers right-bottom point as inside. See https://irrlicht.sourceforge.io/forum//viewtopic.php?t=43914 
   This also changes IGUIElement::isPointInside the same way.
   It fixes some related bugs (like for example combobox often resetting position accidentally).
