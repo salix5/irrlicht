@@ -1,5 +1,6 @@
 --------------------------
 Changes in 1.9 (not yet released)
+- Fix macOS special keys and Command shortcuts handling. Thanks @Mercury233 for patch (#331 - 15)
 - Fix utf-8 parsing. Thanks @Mercury233 for patch proposal (#331 - 12)
 - Fix creating NSMenu with a null bundle name (macOS). Thanks @Mercury233 for patch (#331 - 4)
 - Use snprintf_irr instead of sprintf. Thanks @Mercury233 for patch (#331 - 3)
