@@ -192,19 +192,17 @@ public:
 	}
 
 	//! Lock function. Use this to get a pointer to the image data.
-	/** Use getData instead.
+	/** Deprecated, use getData instead (which does the same).
 	\return Pointer to the image data. What type of data is pointed to
 	depends on the color format of the image. For example if the color
-	format is ECF_A8R8G8B8, it is of u32. Be sure to call unlock() after
-	you don't need the pointer any more. */
+	format is ECF_A8R8G8B8, it is of u32. */
 	IRR_DEPRECATED void* lock()
 	{
 		return getData();
 	}
 
 	//! Unlock function.
-	/** Should be called after the pointer received by lock() is not
-	needed anymore. */
+	/** Does nothing anymore, deprecated */
 	IRR_DEPRECATED void unlock()
 	{
 	}
