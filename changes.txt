@@ -234,7 +234,6 @@ Changes in 1.9 (not yet released)
 - No longer try to convert ECF_R5G6B5 to ECF_A1R5G5B5 on OpenGL (just made texture-loading seem to fail).
 - Add parameter SIrrlichtCreationParameters.WindowResizable. Mainly to work around troubles with SDL+OpenGL on some platforms where resizing later can be tricky/impossible.
 - Add operator[]  to vector2d and vector3d
-- Bugfix: IrrlichtDevice::isWindowMinimized no longer returns true when it's maximized on Windows.
 - Ignore degenerated faces in obj file loader when they would generate triangles where 2 vertices use identical indices.
 - Add CMatrix4::transformVec4 to transform vectors with 4 elements (thx @ devsh)
 - Add ITexture::getOriginalColorFormat to access color format of images used to create a texture
@@ -475,6 +474,9 @@ Changes in 1.9 (not yet released)
 
 --------------------------
 Changes in 1.8.6
+- Bugfix: IrrlichtDevice::isWindowMinimized no longer returns true when it's maximized on Windows.
+- Fix CGUIButton showing wrong pressed image when setImage was called twice with different textures.
+  Thanks @Mercury233 for the patch (#332 - 3)
 - Fix zlib decompression calling inflateEnd twice and returning OK when it failed.
   Thanks @Mercury233 for the patch (#332 - 2)
 - Add EMIE_LMOUSE_DOUBLE_CLICK and EMIE_LMOUSE_TRIPLE_CLICK support on macOS. 
