@@ -233,7 +233,7 @@ IImage* CImageLoaderJPG::loadImage(io::IReadFile* file) const
 	u32 height = cinfo.image_height;
 
 	if (	width > JPEG_MAX_DIMENSION || height > JPEG_MAX_DIMENSION 
-		|| !IImage::checkDataSizeLimit(IImage::getDataSizeFromFormat(ECF_R8G8B8, width, height))
+		|| !IImage::checkDataSizeLimit(IImage::getDataSizeFromFormat(ECF_R8G8B8, width, height), width, height)
 		)
 	{
 		os::Printer::log("Image dimensions too large in file", filename, ELL_ERROR);
