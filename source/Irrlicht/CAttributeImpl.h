@@ -6,6 +6,7 @@
 #include "fast_atof.h"
 #include "ITexture.h"
 #include "IVideoDriver.h"
+#include <cinttypes>
 
 namespace irr
 {
@@ -2034,8 +2035,8 @@ public:
 
 	virtual void setString(const char* text)
 	{
-		u32 tmp;
-		sscanf(text, "0x%x", &tmp);
+		uintptr_t tmp = 0;
+		sscanf(text, "0x%" SCNxPTR, &tmp);
 		Value = (void *) tmp;
 	}
 
