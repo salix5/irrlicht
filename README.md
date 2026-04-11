@@ -6,6 +6,12 @@ The mirroring is done manually using git-svn. The URL-like text in commit messag
 
 -----
 
+## Modifications
+
+- Fixed clipboard on Windows, macOS and Linux. Now it can support Unicode characters (but only double-byte characters on Windows).
+- Added Input Method Editor (IME) support on Windows, macOS and Linux, for CJK users.
+- Added CI Build support for Windows, macOS and Linux. The test part is still under development (no good graphics support on GitHub Actions runners), but the build part is working.
+
 ## Branches
 
 - `trunk` - **Mirror** of https://sourceforge.net/p/irrlicht/code/HEAD/tree/trunk/ . Also known as "upstream", the version code is `1.9`. This branch will never be modified directly.
