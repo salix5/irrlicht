@@ -10,9 +10,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import <OpenGL/gl.h>
-#ifndef __MAC_10_6
 #import <Carbon/Carbon.h>
-#endif
 
 #include "CIrrDeviceOSX.h"
 
@@ -22,6 +20,9 @@
 #include "CTimer.h"
 #include "irrString.h"
 #include "Keycodes.h"
+#include "IGUIEnvironment.h"
+#include "IGUIElement.h"
+#include "EGUIElementTypes.h"
 #include <stdio.h>
 #include <sys/utsname.h>
 #include "COSOperator.h"
@@ -302,7 +303,7 @@ static void getJoystickDeviceInfo (io_object_t hidDevice, CFMutableDictionaryRef
 #endif // _IRR_COMPILE_WITH_JOYSTICK_EVENTS_
 
 // only OSX 10.5 seems to not need these defines...
-#if !defined(__MAC_10_5) || defined(__MAC_10_6)
+#if !defined(__MAC_10_5)
 // Contents from Events.h from Carbon/HIToolbox but we need it with Cocoa too
 // and for some reason no Cocoa equivalent of these constants seems provided.
 // So I'm doing like everyone else and using copy-and-paste.
@@ -475,6 +476,113 @@ namespace irr
 
 static bool firstLaunch = true;
 
+// ---------------------------------------------------------------------------
+// Returns true when the currently selected keyboard input source is a
+// "keyboard input method" (i.e. a true IME such as Chinese Pinyin / Wubi,
+// Japanese Kana, Korean Hangul, etc.).  Plain keyboard layouts (US, ABC,
+// French, …) return false.
+// This is used to decide whether the hidden TextInputView should be made
+// visible: only IMEs produce preedit (marked) text that needs a real text
+// view for the candidate window to anchor to.
+// ---------------------------------------------------------------------------
+static bool currentInputSourceIsIME()
+{
+    TISInputSourceRef source = TISCopyCurrentKeyboardInputSource();
+    if (!source)
+        return false;
+    CFStringRef sourceType = (CFStringRef)TISGetInputSourceProperty(
+        source, kTISPropertyInputSourceType);
+    bool isIME = sourceType &&
+        CFStringCompare(sourceType, kTISTypeKeyboardInputMode, 0) == kCFCompareEqualTo;
+    CFRelease(source);
+    return isIME;
+}
+
+// ---------------------------------------------------------------------------
+// CIrrTextInputViewOSX – dedicated hidden NSTextView subview whose sole job is
+// to receive keyboard events and route them through the macOS text-input /
+// IME system.  Keeping this separate from CIrrDelegateOSX means the
+// Application Delegate stays a plain NSObject with no text-handling baggage.
+// ---------------------------------------------------------------------------
+@interface CIrrTextInputViewOSX : NSTextView
+- (id)initWithDevice:(irr::CIrrDeviceMacOSX*)device;
+@end
+
+// Stores the NSEvent* currently being processed in keyDown: so that
+// doCommandBySelector: can forward the correct event to processKeyEvent().
+// Safer than [NSApp currentEvent], which may point to a different event by
+// the time interpretKeyEvents: finishes dispatching.
+static NSEvent* s_pendingTextInputKeyEvent = nil;
+
+@implementation CIrrTextInputViewOSX
+{
+    irr::CIrrDeviceMacOSX* Device;
+}
+
+- (id)initWithDevice:(irr::CIrrDeviceMacOSX*)device
+{
+    self = [super initWithFrame:NSZeroRect];
+    if (self)
+        Device = device;
+    return self;
+}
+
+// Explicitly activate our input context when we become first responder.
+// This is critical when the system IME is already active (e.g. Chinese at startup):
+// makeFirstResponder: alone doesn't guarantee the IME re-routes to this context.
+- (BOOL)becomeFirstResponder
+{
+    BOOL result = [super becomeFirstResponder];
+    if (result)
+        [[self inputContext] activate];
+    return result;
+}
+
+- (void)keyDown:(NSEvent *)event
+{
+    s_pendingTextInputKeyEvent = event;
+    [self interpretKeyEvents:@[event]];
+    s_pendingTextInputKeyEvent = nil;
+}
+
+- (void)insertText:(id)string replacementRange:(NSRange)replacementRange
+{
+    // Discard any residual marked text before committing a final character.
+    [self setString:@""];
+    if ([string isKindOfClass:[NSAttributedString class]])
+        Device->handleInputEvent([[string string] UTF8String]);
+    else
+        Device->handleInputEvent([string UTF8String]);
+}
+
+// Pre-10.11 fallback
+- (void)insertText:(id)string
+{
+    [self insertText:string replacementRange:NSMakeRange(NSNotFound, 0)];
+}
+
+// Override setMarkedText to force an immediate display update.
+// In a game loop that uses [NSDate distantPast] the normal run-loop display
+// coalescing phase is skipped, so marked (preedit) text would never appear
+// without an explicit redisplay request.
+- (void)setMarkedText:(id)string selectedRange:(NSRange)selectedRange replacementRange:(NSRange)replacementRange
+{
+    [super setMarkedText:string selectedRange:selectedRange replacementRange:replacementRange];
+    [self displayIfNeeded];
+}
+
+- (void)doCommandBySelector:(SEL)selector
+{
+    Device->processKeyEvent();
+}
+
+- (void)paste:(id)sender
+{
+    [self setString:@""];
+}
+
+@end
+
 @implementation CIrrDelegateOSX
 {
     irr::CIrrDeviceMacOSX* Device;
@@ -496,6 +604,16 @@ static bool firstLaunch = true;
 - (void)applicationDidFinishLaunching:(NSNotification*)notification
 {
     Quit = false;
+}
+
+- (void)applicationDidBecomeActive:(NSNotification*)notification
+{
+    // Re-raise and re-key the game window so the menu bar, keyboard input
+    // and IME all bind correctly regardless of how we were launched.
+    NSWindow* w = Device->getWindow();
+    if (w)
+        [w makeKeyAndOrderFront:nil];
+    Device->reactivateIME();
 }
 
 - (void)orderFrontStandardAboutPanel:(id)sender
@@ -527,6 +645,14 @@ static bool firstLaunch = true;
 {
     Device->setWindow(nil);
     Quit = true;
+}
+
+- (void)windowDidBecomeKey:(NSNotification *)notification
+{
+    // The window may become key *after* run() has already tried to activate
+    // the IME input context (e.g. when launched from a terminal).  Re-activate
+    // now so the IME correctly routes to our TextInputView.
+    Device->reactivateIME();
 }
 
 - (NSSize)windowWillResize:(NSWindow *)window toSize:(NSSize)proposedFrameSize
@@ -562,7 +688,7 @@ CIrrDeviceMacOSX::CIrrDeviceMacOSX(const SIrrlichtCreationParameters& param)
 	DeviceWidth(0), DeviceHeight(0),
 	ScreenWidth(0), ScreenHeight(0), MouseButtonStates(0),
 	IsActive(true), IsFullscreen(false), IsShiftDown(false), IsControlDown(false), IsResizable(false),
-	SoftwareDriverTarget(nil),SoftwareRendererType(0)
+	SoftwareDriverTarget(nil),SoftwareRendererType(0), TextInputView(nil)
 {
 	struct utsname name;
 
@@ -578,7 +704,6 @@ CIrrDeviceMacOSX::CIrrDeviceMacOSX(const SIrrlichtCreationParameters& param)
 		{
 			[[NSAutoreleasePool alloc] init];
 			[[NSApplication sharedApplication] setActivationPolicy:NSApplicationActivationPolicyRegular];
-			[[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
 			[[NSApplication sharedApplication] setDelegate:[[[CIrrDelegateOSX alloc] initWithDevice:this] autorelease]];
             
             // Create menu
@@ -662,6 +787,7 @@ void CIrrDeviceMacOSX::closeDevice()
 		[Window release];
 		Window = nil;
 	}
+	TextInputView = nil; // owned by the window's view hierarchy, already released
     
     if (IsFullscreen)
         CGReleaseAllDisplays();
@@ -801,6 +927,22 @@ bool CIrrDeviceMacOSX::createWindow()
             [Window setAcceptsMouseMovedEvents:TRUE];
             [Window setIsVisible:TRUE];
             [Window makeKeyAndOrderFront:nil];
+            // Dispatch activation asynchronously so it fires once the run
+            // loop is actually running (first call to run()).  On macOS 14+
+            // activateIgnoringOtherApps: is a no-op; use the new activate API.
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (@available(macOS 14.0, *))
+                    [NSApp activate];
+                else
+                    [NSApp activateIgnoringOtherApps:YES];
+            });
+
+            // Create a dedicated CIrrTextInputViewOSX subview for IME routing.
+            // A separate class keeps the Application Delegate as a plain NSObject.
+            TextInputView = [[CIrrTextInputViewOSX alloc] initWithDevice:this];
+            [TextInputView setHidden:YES];
+            [[Window contentView] addSubview:TextInputView];
+            [TextInputView release]; // retained by the view hierarchy
         }
         
         if (IsFullscreen) //hide menus in fullscreen mode only
@@ -951,6 +1093,80 @@ bool CIrrDeviceMacOSX::run()
 	os::Timer::tick();
 	storeMouseLocation();
 
+	// Check if an edit box currently has focus for IME routing
+	irr::gui::IGUIElement* focusElement = getGUIEnvironment() ? getGUIEnvironment()->getFocus() : 0;
+	bool editing = focusElement && focusElement->getType() == irr::gui::EGUIET_EDIT_BOX && focusElement->isEnabled();
+
+	// Detect whether the system is currently using a true IME input method.
+	// Only query TIS when necessary (editing) to avoid the overhead every frame
+	// when no edit box is focused.
+	bool imeActive = editing && currentInputSourceIsIME();
+	NSTextView* textInput = TextInputView;
+	const bool useTextInput = editing && Window && textInput;
+
+	if (Window)
+	{
+		if (!useTextInput)
+		{
+			if (![textInput isHidden])
+				[textInput setHidden:YES];
+			if ([Window firstResponder] == textInput)
+				[Window makeFirstResponder:nil];
+		}
+		else
+		{
+			irr::core::rect<irr::s32> crect = focusElement->getAbsolutePosition();
+
+			// Set font height to match the element so IME candidate window positioning works
+			[textInput setFont:[NSFont userFontOfSize:crect.getHeight() * 0.66f]];
+
+			// Convert from top-left (Irrlicht) to bottom-left (Cocoa) coordinates.
+			// Place the text view BELOW the edit box if there is enough space;
+			// otherwise put it in the right half of the edit box row so it doesn't cover the text.
+			CGFloat frameHeight = [[textInput superview] frame].size.height;
+			CGFloat spaceBelow = frameHeight - (CGFloat)crect.LowerRightCorner.Y;
+			CGFloat h = (CGFloat)crect.getHeight();
+			NSRect rect;
+			if (spaceBelow > h)
+			{
+				// Enough room below: align text view top with edit box bottom
+				rect = NSMakeRect(
+					(CGFloat)crect.UpperLeftCorner.X,
+					spaceBelow - h - 1.0f,
+					(CGFloat)(crect.getWidth() / 2),
+					h);
+			}
+			else
+			{
+				// Not enough room below: occupy the right half of the edit box row
+				rect = NSMakeRect(
+					(CGFloat)(crect.UpperLeftCorner.X + crect.getWidth() / 2),
+					spaceBelow,
+					(CGFloat)(crect.getWidth() / 2),
+					h);
+			}
+			[textInput setFrame:rect];
+			// Show the view only for real IME input methods (Chinese, Japanese,
+			// Korean, …).  For plain ASCII keyboard layouts the view stays
+			// invisible; it is still used as first responder for key routing but
+			// there is no preedit text to render, so displaying it would just
+			// show a blank rectangle over the edit box.
+			[textInput setHidden:!imeActive];
+
+			// Only (re)establish first responder when actually necessary.
+			// Calling makeFirstResponder: every frame while composition is
+			// in progress would reset the input context and discard the
+			// in-flight preedit string.
+			if ([Window firstResponder] != textInput)
+			{
+				[Window makeFirstResponder:textInput];
+				// Explicitly activate the input context so the system IME
+				// (e.g. Chinese Pinyin active at launch) routes to this view.
+				[[textInput inputContext] activate];
+			}
+		}
+	}
+
 	event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:[NSDate distantPast] inMode:NSDefaultRunLoopMode dequeue:YES];
 	if (event != nil)
 	{
@@ -959,17 +1175,35 @@ bool CIrrDeviceMacOSX::run()
 		switch([(NSEvent *)event type])
 		{
 			case NSKeyDown:
-				postKeyEvent(event,ievent,true);
+				if (useTextInput)
+				{
+					// Delegate to the text view (NSTextView subclass / first responder)
+					// so the macOS text input system handles IME composition.
+					[NSApp sendEvent:event];
+				}
+				else
+				{
+					postKeyEvent(event,ievent,true);
+				}
 				break;
 
 			case NSKeyUp:
-				postKeyEvent(event,ievent,false);
+				if (useTextInput)
+				{
+					[NSApp sendEvent:event];
+				}
+				else
+				{
+					postKeyEvent(event,ievent,false);
+				}
 				break;
 
 			case NSFlagsChanged:
 				ievent.EventType = irr::EET_KEY_INPUT_EVENT;
 				ievent.KeyInput.Shift = ([(NSEvent *)event modifierFlags] & NSShiftKeyMask) != 0;
 				ievent.KeyInput.Control = ([(NSEvent *)event modifierFlags] & NSControlKeyMask) != 0;
+				ievent.KeyInput.AutoRepeat = false;
+				ievent.KeyInput.Extended = false;
 
 				if (IsShiftDown != ievent.KeyInput.Shift)
 				{
@@ -1167,6 +1401,63 @@ bool CIrrDeviceMacOSX::isWindowMinimized() const
 }
 
 
+void CIrrDeviceMacOSX::processKeyEvent()
+{
+	// Use the event stored by CIrrTextInputViewOSX::keyDown
+	NSEvent *event = s_pendingTextInputKeyEvent
+		? s_pendingTextInputKeyEvent
+		: [[NSApplication sharedApplication] currentEvent];
+	if (!event)
+		return;
+	// This SEvent will be filled in by postKeyEvent().
+	SEvent ievent;
+	memset(&ievent, 0, sizeof(ievent));
+	postKeyEvent(event, ievent, true);
+}
+
+void CIrrDeviceMacOSX::reactivateIME()
+{
+	// If TextInputView is already the first responder, activate its input context
+	// and sync visibility with the current input source (IME vs. plain layout).
+	if (TextInputView && Window && [Window firstResponder] == (id)TextInputView)
+	{
+		[[TextInputView inputContext] activate];
+		[TextInputView setHidden:!currentInputSourceIsIME()];
+	}
+}
+
+void CIrrDeviceMacOSX::handleInputEvent(const char *cStr)
+{
+	SEvent ievent;
+
+	ievent.EventType = irr::EET_KEY_INPUT_EVENT;
+	// KEY_ACCEPT signals an IME-committed character, consistent with Windows.
+	ievent.KeyInput.Key = irr::KEY_ACCEPT;
+	ievent.KeyInput.Shift = false;
+	ievent.KeyInput.Control = false;
+	ievent.KeyInput.AutoRepeat = false;
+	ievent.KeyInput.Extended = false;
+
+	// Convert UTF-8 input (from NSString::UTF8String) to wide characters.
+	wchar_t* wStr = core::toWideChar(cStr);
+	if (wStr)
+	{
+		const size_t len = wcslen(wStr);
+		for (size_t i = 0; i < len; ++i)
+		{
+			ievent.KeyInput.Char = wStr[i];
+			ievent.KeyInput.PressedDown = true;
+			postEventFromUser(ievent);
+			// IME commits have no subsequent key-release event; generate it here
+			// so consumers can reliably detect the key-up transition.
+			ievent.KeyInput.PressedDown = false;
+			postEventFromUser(ievent);
+		}
+		delete[] wStr;
+	}
+}
+
+
 void CIrrDeviceMacOSX::postKeyEvent(void *event,irr::SEvent &ievent,bool pressed)
 {
 	NSString *str;
@@ -1229,10 +1520,13 @@ void CIrrDeviceMacOSX::postKeyEvent(void *event,irr::SEvent &ievent,bool pressed
 		ievent.KeyInput.Shift = ([(NSEvent *)event modifierFlags] & NSShiftKeyMask) != 0;
 		ievent.KeyInput.Control = ([(NSEvent *)event modifierFlags] & NSControlKeyMask) != 0;
 		ievent.KeyInput.Char = mchar;
+		ievent.KeyInput.AutoRepeat = false;
+		ievent.KeyInput.Extended = false;
 
 		if (skipCommand)
 			ievent.KeyInput.Control = true;
-		else if ([(NSEvent *)event modifierFlags] & NSCommandKeyMask)
+		else if (([(NSEvent *)event modifierFlags] & NSCommandKeyMask) && !s_pendingTextInputKeyEvent)
+			// Only re-dispatch Command+key events when we are NOT inside the IME processing path
 			[NSApp sendEvent:(NSEvent *)event];
 
 		postEventFromUser(ievent);
@@ -1359,7 +1653,18 @@ void CIrrDeviceMacOSX::setCursorVisible(bool visible)
     
 void CIrrDeviceMacOSX::setWindow(NSWindow* window)
 {
+    // If the window instance changes (e.g. after a fullscreen transition that
+    // replaces the NSWindow), TextInputView belongs to the old window's view
+    // hierarchy and will be released with it.  Nil the pointer here so run()
+    // does not dereference freed memory.
+    if (Window != window)
+        TextInputView = nil;
     Window = window;
+}
+
+NSWindow* CIrrDeviceMacOSX::getWindow() const
+{
+    return Window;
 }
 
 
@@ -1434,7 +1739,6 @@ void CIrrDeviceMacOSX::initKeycodes()
 	KeyCodes[kVK_ANSI_U] = irr::KEY_KEY_U;
 	KeyCodes[kVK_ANSI_V] = irr::KEY_KEY_V;
 	KeyCodes[kVK_ANSI_W] = irr::KEY_KEY_W;
-	KeyCodes[kVK_ANSI_X] = irr::KEY_KEY_X;
 	KeyCodes[kVK_ANSI_X] = irr::KEY_KEY_X;
 	KeyCodes[kVK_ANSI_Y] = irr::KEY_KEY_Y;
 	KeyCodes[kVK_ANSI_Z] = irr::KEY_KEY_Z;
