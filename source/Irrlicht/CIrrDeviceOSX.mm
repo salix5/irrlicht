@@ -1432,6 +1432,7 @@ void CIrrDeviceMacOSX::reactivateIME()
 void CIrrDeviceMacOSX::handleInputEvent(const char *cStr)
 {
 	SEvent ievent;
+	memset(&ievent, 0, sizeof(ievent));
 
 	ievent.EventType = irr::EET_KEY_INPUT_EVENT;
 	// KEY_ACCEPT signals an IME-committed character, consistent with Windows.
