@@ -2173,7 +2173,33 @@ const c8* CIrrDeviceLinux::getTextFromClipboard() const
 					&& data
 					&& (type == X_ATOM_UTF8_STRING || type == XA_STRING) ) // not implemented: INCR (partial reads)
 				{
-					Clipboard = core::stringc((const c8*)data, size);
+					if (type == XA_STRING)
+					{
+						// XA_STRING is ISO-8859-1; convert to UTF-8 so
+						// higher-level code (e.g. core::toWideChar) works
+						// correctly.  Each byte 0x80-0xFF maps to a 2-byte
+						// UTF-8 sequence; 0x00-0x7F is identical.
+						core::stringc utf8;
+						utf8.reserve(size);
+						for (unsigned long i = 0; i < size; ++i)
+						{
+							unsigned char ch = (unsigned char)data[i];
+							if (ch < 0x80)
+							{
+								utf8 += (c8)ch;
+							}
+							else
+							{
+								utf8 += (c8)(0xC0 | (ch >> 6));
+								utf8 += (c8)(0x80 | (ch & 0x3F));
+							}
+						}
+						Clipboard = utf8;
+					}
+					else
+					{
+						Clipboard = core::stringc((const c8*)data, size);
+					}
 				}
 				if (data)
 					XFree (data);
