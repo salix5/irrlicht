@@ -110,14 +110,13 @@ sharedlib: LDFLAGS += -L/usr/X11R6/lib$(LIBSELECT) -lGL -lXxf86vm
 staticlib sharedlib: CXXINCS += -I/usr/X11R6/include
 
 #OSX specific options
+#TODO: I'm afraid it is not working, but the Xcode project seems to work.
 staticlib_osx sharedlib_osx install_osx: SYSTEM = MacOSX
-staticlib_osx sharedlib_osx: IRROTHEROBJ += MacOSX/CIrrDeviceMacOSX.o MacOSX/OSXClipboard.o MacOSX/AppDelegate.o
-staticlib_osx sharedlib_osx: CXXINCS += -IMacOSX -I/usr/X11R6/include
+staticlib_osx sharedlib_osx: IRROTHEROBJ += CIrrDeviceOSX.o CNSOGLManager.o
+staticlib_osx sharedlib_osx: CXXINCS += -I/usr/X11R6/include
+staticlib_osx sharedlib_osx: CXXFLAGS += -x objective-c++
 sharedlib_osx install_osx: SHARED_LIB = libIrrlicht.dylib
-staticlib_osx sharedlib_osx: LDFLAGS += --no-export-all-symbols --add-stdcall-alias
-sharedlib_osx: LDFLAGS += -L/usr/X11R6/lib$(LIBSELECT) -lGL -lXxf86vm
-# for non-X11 app
-#sharedlib_osx: LDFLAGS += -framework cocoa -framework carbon -framework opengl -framework IOKit
+sharedlib_osx: LDFLAGS += -framework Cocoa -framework Carbon -framework OpenGL -framework IOKit
 
 #Windows specific options
 IRRLICHT_DLL := ../../bin/Win32-gcc/Irrlicht.dll
@@ -191,6 +190,10 @@ TAGS:
 # Create object files from objective-c code
 %.o:%.mm
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
+
+# Create dependency files for objective-c code
+%.d:%.mm
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -MM -MF $@ $<
 
 ifneq ($(MAKECMDGOALS),clean)
 -include $(LINKOBJ:.o=.d)
