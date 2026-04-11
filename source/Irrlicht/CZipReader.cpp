@@ -41,6 +41,12 @@ extern "C" void bz_internal_error(int errorCode)
 	#endif
 #endif
 
+// Maximum allowed decompressed file size to protect against zip bombs.
+// Can be overridden by defining IRR_ZIP_MAX_DECOMPRESSED_SIZE before including this file.
+#ifndef IRR_ZIP_MAX_DECOMPRESSED_SIZE
+	#define IRR_ZIP_MAX_DECOMPRESSED_SIZE (0x40000000u) // 1 GB
+#endif
+
 namespace irr
 {
 namespace io
@@ -624,6 +630,13 @@ IReadFile* CZipReader::createAndOpenFile(u32 index)
   			#ifdef _IRR_COMPILE_WITH_ZLIB_
 
 			const u32 uncompressedSize = e.header.DataDescriptor.UncompressedSize;
+			if (uncompressedSize > IRR_ZIP_MAX_DECOMPRESSED_SIZE)
+			{
+				os::Printer::log("Decompressed size exceeds limit, possible zip bomb", Files[index].FullName, ELL_ERROR);
+				if (decrypted)
+					decrypted->drop();
+				return 0;
+			}
 			c8* pBuf = new c8[ uncompressedSize ];
 			if (!pBuf)
 			{
@@ -695,6 +708,13 @@ IReadFile* CZipReader::createAndOpenFile(u32 index)
   			#ifdef _IRR_COMPILE_WITH_BZIP2_
 
 			const u32 uncompressedSize = e.header.DataDescriptor.UncompressedSize;
+			if (uncompressedSize > IRR_ZIP_MAX_DECOMPRESSED_SIZE)
+			{
+				os::Printer::log("Decompressed size exceeds limit, possible zip bomb", Files[index].FullName, ELL_ERROR);
+				if (decrypted)
+					decrypted->drop();
+				return 0;
+			}
 			c8* pBuf = new c8[ uncompressedSize ];
 			if (!pBuf)
 			{
@@ -765,6 +785,13 @@ IReadFile* CZipReader::createAndOpenFile(u32 index)
   			#ifdef _IRR_COMPILE_WITH_LZMA_
 
 			u32 uncompressedSize = e.header.DataDescriptor.UncompressedSize;
+			if (uncompressedSize > IRR_ZIP_MAX_DECOMPRESSED_SIZE)
+			{
+				os::Printer::log("Decompressed size exceeds limit, possible zip bomb", Files[index].FullName, ELL_ERROR);
+				if (decrypted)
+					decrypted->drop();
+				return 0;
+			}
 			c8* pBuf = new c8[ uncompressedSize ];
 			if (!pBuf)
 			{
