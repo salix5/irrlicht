@@ -1323,7 +1323,7 @@ bool CIrrDeviceMacOSX::run()
 
 	[Pool release];
 
-	return (![[NSApp delegate] isQuit] && IsActive);
+	return (![(CIrrDelegateOSX *)[NSApp delegate] isQuit] && IsActive);
 }
 
 
