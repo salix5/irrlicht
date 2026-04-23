@@ -2036,28 +2036,8 @@ public:
 
 	virtual void setString(const char* text) IRR_OVERRIDE
 	{
-		size_t val = 0;
-		switch ( sizeof(void*) )
-		{
-			case 4:
-			{
-				unsigned int tmp; // not using an irrlicht type - sscanf with %x needs always unsigned int
-				sscanf(text, "%x", &tmp);
-				val = (size_t)tmp;
-			}
-			break;
-			case 8:
-			{
-#ifdef _MSC_VER
-				const unsigned __int64 tmp = _strtoui64(text, NULL, 16);
-#else
-				const unsigned long long tmp = strtoull(text, NULL, 16);
-#endif
-				val = (size_t)tmp;
-			}
-			break;
-		}
-		Value = (void *)val;
+		unsigned long long tmp = std::strtoull(text, nullptr, 16);
+		Value = reinterpret_cast<void*>(static_cast<uintptr_t>(tmp));
 	}
 
 	virtual E_ATTRIBUTE_TYPE getType() const IRR_OVERRIDE
