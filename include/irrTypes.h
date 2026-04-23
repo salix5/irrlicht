@@ -5,7 +5,7 @@
 #ifndef IRR_TYPES_H_INCLUDED
 #define IRR_TYPES_H_INCLUDED
 
-#include <cstdint>
+#include <stdint.h>
 #include "IrrCompileConfig.h"
 
 #if defined(__GNUC__)
