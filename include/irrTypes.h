@@ -176,15 +176,7 @@ For functions:		template<class T> IRR_DEPRECATED void test4(void) {}
 /** Usage in a derived class:
 virtual void somefunc() IRR_OVERRIDE;
 */
-#if ( ((__GNUC__ > 4 ) || ((__GNUC__ == 4 ) && (__GNUC_MINOR__ >= 7))) && (defined(__GXX_EXPERIMENTAL_CXX0X) || __cplusplus >= 201103L) )
 #define IRR_OVERRIDE override
-#elif (_MSC_VER >= 1600 ) /* supported since MSVC 2010 */
-#define IRR_OVERRIDE override
-#elif (__clang_major__ >= 3 && __has_feature(cxx_override_control))
-#define IRR_OVERRIDE override
-#else
-#define IRR_OVERRIDE
-#endif
 
 // memory debugging
 #if defined(_DEBUG) && defined(IRRLICHT_EXPORTS) && defined(_MSC_VER) && \
