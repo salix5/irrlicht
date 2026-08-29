@@ -52,7 +52,7 @@ jobs:
         run: msbuild tests\tests_vc17.sln /p:Configuration=Release /p:Platform=x64 /m
 
       - name: Run Tests
-        timeout-minutes: 2
+        timeout-minutes: 5
         working-directory: tests
         run: |
           New-Item -ItemType Directory -Force -Path results
@@ -69,18 +69,12 @@ jobs:
             tests/results/
           if-no-files-found: ignore
 
-      - name: Pack build artifacts
-        if: always()
-        run: |
-          7z a -ms=on build-windows-x64.7z bin/Win64-VisualStudio/ lib/Win64-visualStudio/
-      
       - name: Upload build artifacts
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: build-windows-x64
-          path: build-windows-x64.7z
-          archive: false
+          path: lib/Win64-VisualStudio/
 
   build-ubuntu:
     name: Ubuntu 24.04
@@ -130,18 +124,12 @@ jobs:
             tests/results/
           if-no-files-found: ignore
 
-      - name: Pack build artifacts
-        if: always()
-        run: |
-          7z a -ms=on build-ubuntu.7z bin/Linux/ lib/Linux/
-      
       - name: Upload build artifacts
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: build-ubuntu
-          path: build-ubuntu.7z
-          archive: false
+          path: lib/Linux/
 
   build-macos:
     name: macOS 15 (ARM)
@@ -155,6 +143,7 @@ jobs:
           xcodebuild -project source/Irrlicht/Irrlicht.xcodeproj \
             -scheme Irrlicht_OSX \
             -configuration Release \
+            ONLY_ACTIVE_ARCH=YES \
             build
 
       - name: Build Examples
@@ -168,7 +157,7 @@ jobs:
             scheme=$(basename "$scheme_file" .xcscheme)
             name=$(basename "$(dirname "$proj")")
             echo "::group::Building $name"
-            xcodebuild -project "$proj" -scheme "$scheme" -configuration Release build \
+            xcodebuild -project "$proj" -scheme "$scheme" -configuration Release ONLY_ACTIVE_ARCH=YES build \
               OTHER_LDFLAGS="-framework Carbon -framework OpenGL -framework Cocoa -framework IOKit" 2>&1 || \
               echo "::warning::$name failed to build"
             echo "::endgroup::"
@@ -199,23 +188,12 @@ jobs:
             tests/results/
           if-no-files-found: ignore
 
-      - name: Install new 7-Zip from homebrew
-        if: always()
-        run: |
-          brew install sevenzip
-
-      - name: Pack build artifacts
-        if: always()
-        run: |
-          7zz a -ms=on build-macos.7z bin/OSX/ bin/MacOSX/ lib/OSX/
-      
       - name: Upload build artifacts
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: build-macos
-          path: build-macos.7z
-          archive: false
+          path: lib/OSX/
 
   build-macos-intel:
     name: macOS 15 (Intel x86_64)
@@ -229,6 +207,7 @@ jobs:
           xcodebuild -project source/Irrlicht/Irrlicht.xcodeproj \
             -scheme Irrlicht_OSX \
             -configuration Release \
+            ONLY_ACTIVE_ARCH=YES \
             build
 
       - name: Build Examples
@@ -242,7 +221,7 @@ jobs:
             scheme=$(basename "$scheme_file" .xcscheme)
             name=$(basename "$(dirname "$proj")")
             echo "::group::Building $name"
-            xcodebuild -project "$proj" -scheme "$scheme" -configuration Release build \
+            xcodebuild -project "$proj" -scheme "$scheme" -configuration Release ONLY_ACTIVE_ARCH=YES build \
               OTHER_LDFLAGS="-framework Carbon -framework OpenGL -framework Cocoa -framework IOKit" 2>&1 || \
               echo "::warning::$name failed to build"
             echo "::endgroup::"
@@ -273,20 +252,9 @@ jobs:
             tests/results/
           if-no-files-found: ignore
 
-      - name: Install new 7-Zip from homebrew
-        if: always()
-        run: |
-          brew install sevenzip
-
-      - name: Pack build artifacts
-        if: always()
-        run: |
-          7zz a -ms=on build-macos-intel.7z bin/OSX/ bin/MacOSX/ lib/OSX/
-      
       - name: Upload build artifacts
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: build-macos-intel
-          path: build-macos-intel.7z
-          archive: false
+          path: lib/OSX/
