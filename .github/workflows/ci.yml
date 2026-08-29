@@ -28,7 +28,7 @@ jobs:
       - name: Download DirectX SDK
         if: steps.dxsdk.outputs.cache-hit != 'true'
         id: dxsdk-download
-        uses: salix5/action-cache-download-file@1c68043f7257b3e7ce3b621a9d0b4dcdd86b4bea
+        uses: salix5/action-cache-download-file@42a33307a0e00b163efaf26f29149a62d7bbd37d
         with:
           url: https://download.microsoft.com/download/a/e/7/ae743f1f-632b-4809-87a9-aa1bb3458e31/DXSDK_Jun10.exe
 
