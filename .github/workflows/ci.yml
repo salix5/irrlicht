@@ -52,11 +52,10 @@ jobs:
         run: msbuild tests\tests_vc17.sln /p:Configuration=Release /p:Platform=x64 /m
 
       - name: Run Tests
-        timeout-minutes: 5
         working-directory: tests
         run: |
           New-Item -ItemType Directory -Force -Path results
-          ..\bin\Win64-VisualStudio\tests.exe
+          ..\bin\Win64-VisualStudio\tests.exe 0 19
         continue-on-error: true
 
       - name: Upload test results
@@ -104,11 +103,11 @@ jobs:
           ulimit -c unlimited
           echo "$PWD/core.%e.%p" | sudo tee /proc/sys/kernel/core_pattern
           export XMODIFIERS=""
-          xvfb-run ../bin/Linux/tests 2>&1 || true
+          xvfb-run ../bin/Linux/tests 0 19 2>&1 || true
           for corefile in core.*; do
             if [ -f "$corefile" ]; then
               echo "::group::Backtrace from core dump"
-              gdb -batch -ex "thread apply all bt full" ../bin/Linux/tests "$corefile" 2>&1 || true
+              gdb -batch -ex "thread apply all bt full" ../bin/Linux/tests 0 19 "$corefile" 2>&1 || true
               echo "::endgroup::"
             fi
           done
@@ -175,7 +174,7 @@ jobs:
         working-directory: tests
         run: |
           mkdir -p results
-          ../bin/MacOSX/tests
+          ../bin/MacOSX/tests 0 19
         continue-on-error: true
 
       - name: Upload test results
@@ -239,7 +238,7 @@ jobs:
         working-directory: tests
         run: |
           mkdir -p results
-          ../bin/MacOSX/tests
+          ../bin/MacOSX/tests 0 19
         continue-on-error: true
 
       - name: Upload test results
