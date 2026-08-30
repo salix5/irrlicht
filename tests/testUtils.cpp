@@ -8,7 +8,6 @@
 #include <stdarg.h>
 
 #if defined(_MSC_VER)  || defined(_IRR_WINDOWS_API_)
-#define _CRT_SECURE_NO_WARNINGS 1
 #include <windows.h> // For OutputDebugString()
 #endif // _MSC_VER || _IRR_WINDOWS_API_
 

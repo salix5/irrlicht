@@ -1,10 +1,6 @@
 // Copyright (C) 2009-2012 Colin MacDonald
 // No rights reserved: this software is in the public domain.
 
-#if defined(_MSC_VER)
-#define _CRT_SECURE_NO_WARNINGS 1
-#endif // _MSC_VER
-
 #include "testUtils.h"
 
 using namespace irr;
