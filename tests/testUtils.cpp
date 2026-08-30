@@ -495,7 +495,7 @@ void logTestString(const char * format, ...)
 
 	va_list arguments;
 	va_start(arguments, format);
-	vsprintf(logString, format, arguments);
+	vsnprintf(logString, sizeof logString, format, arguments);
 	va_end(arguments);
 
 #if defined(_IRR_WINDOWS_API_)

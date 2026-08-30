@@ -438,7 +438,7 @@ inline u32 getTextureSizeFromSurfaceSize(u32 size)
 	{
 		/* Get a list of the font families, storing them in a set to sort */
 		char foundry[256];
-		sprintf(&foundry[0],"%ls",CharSets[currentCharSet].c_str());
+		snprintf(foundry, sizeof foundry, "%ls", CharSets[currentCharSet].c_str());
 		std::set<core::stringw> families;
 		XftPattern *pattern = FcPatternCreate();
 		XftPatternAddString(pattern, FC_FOUNDRY, &foundry[0]);
@@ -478,8 +478,8 @@ inline u32 getTextureSizeFromSurfaceSize(u32 size)
 		XftResult result;
 		XftPattern *request = XftPatternCreate();
 		char foundry[256], family[256];
-		sprintf(&foundry[0],"%ls",CharSets[charsetIndex].c_str());
-		sprintf(&family[0],"%ls",FontNames[fontIndex].c_str());
+		snprintf(foundry, sizeof foundry, "%ls", CharSets[charsetIndex].c_str());
+		snprintf(family, sizeof family, "%ls", FontNames[fontIndex].c_str());
 		XftPatternAddString(request, XFT_FOUNDRY, &foundry[0]);
 		XftPatternAddString(request, XFT_FAMILY, &family[0]);
 		XftPatternAddInteger(request, XFT_PIXEL_SIZE, fontSize);
