@@ -221,7 +221,7 @@ int main(int argumentCount, char * arguments[])
 			}
 		}
 		closeTestLog();
-		printf("See tests.log for results. Or set $PAGER environment variable to show it directly.\n");
+		printf("See tests.log for results.\n");
 		return fails;
 	}
 	else

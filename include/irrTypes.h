@@ -81,23 +81,6 @@ typedef double				f64;
 #define swprintf_irr swprintf
 #define snprintf_irr snprintf
 
-#ifdef _IRR_WINDOWS_API_
-#if defined(_MSC_VER) && _MSC_VER >= 1900
-// Starting from Visual Studio 2015, the standard compliant versions of these
-// methods are available, so we don't need to redefine them.
-#elif defined(_MSC_VER) && _MSC_VER > 1310 && !defined (_WIN32_WCE)
-#undef swprintf_irr
-#undef snprintf_irr
-#define swprintf_irr swprintf_s
-#define snprintf_irr sprintf_s
-#elif !defined(__CYGWIN__)	// MinGW
-#undef swprintf_irr
-#undef snprintf_irr
-#define swprintf_irr _snwprintf
-#define snprintf_irr _snprintf
-#endif
-#endif // _IRR_WINDOWS_API_
-
 // define the wchar_t type if not already built in.
 // It's usually set when VS compiler sets /Zc:wchar_t
 #include <wchar.h>

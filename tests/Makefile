@@ -3,7 +3,7 @@ Target = tests
 Sources = $(wildcard *.cpp)
 
 CPPFLAGS = -I../include -I/usr/X11R6/include -pipe
-CXXFLAGS += -Wall -ansi -pedantic -fno-exceptions
+CXXFLAGS += -Wall -pedantic -fno-exceptions
 ifndef NDEBUG
 CXXFLAGS += -O0 -g -D_DEBUG 
 else

@@ -295,15 +295,6 @@ typedef float ipoltype;
 
 #if defined(PATCH_SUPERTUX_8_0_1_with_1_9_0)
 
-#if defined(_MSC_VER) && _MSC_VER > 1310 && !defined (_WIN32_WCE)
-#define snprintf_irr sprintf_s
-#elif defined(__APPLE__)
-#define snprintf_irr snprintf
-#elif !defined(__CYGWIN__)
-#define swprintf_irr _snwprintf
-#define snprintf_irr _snprintf
-#endif
-
 #define sprintf_countof(x) ((sizeof(x) / sizeof(x[0]))-1)
 
 
