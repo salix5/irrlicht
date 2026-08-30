@@ -138,7 +138,6 @@ int main(int argumentCount, char * arguments[])
 	unsigned int fails = 0;
 
 	bool firstRun=true;
-	const bool spawn=false;
 	// args: [testNumber] [testCount]
 	if(argumentCount > 1)
 	{
@@ -185,34 +184,13 @@ int main(int argumentCount, char * arguments[])
 			{
 				logTestString("\nStarting test %d, '%s'\n",
 						i, tests[i].testName);
-				if (spawn)
+				if (!tests[i].testSignature())
 				{
-					closeTestLog();
-					char runNextTest[256];
-					(void)snprintf_irr(runNextTest, sizeof(runNextTest), "\"%s\" -%d 1", arguments[0], i+1);
-					// Spawn the next test in a new process.
-					if (system(runNextTest))
-					{
-						(void)openTestLog(false);
-						logTestString("\n******** Test failure ********\n"\
-								"Test %d '%s' failed\n"\
-								"******** Test failure ********\n",
-								i, tests[i].testName);
-						++fails;
-					}
-					else
-						(void)openTestLog(false);
-				}
-				else
-				{
-					if (!tests[i].testSignature())
-					{
-						logTestString("\n******** Test failure ********\n"\
-								"Test %d '%s' failed\n"\
-								"******** Test failure ********\n",
-								i, tests[i].testName);
-						++fails;
-					}
+					logTestString("\n******** Test failure ********\n"\
+						"Test %d '%s' failed\n"\
+						"******** Test failure ********\n",
+						i, tests[i].testName);
+					++fails;
 				}
 			}
 		}
