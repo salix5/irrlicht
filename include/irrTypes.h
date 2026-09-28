@@ -161,18 +161,6 @@ virtual void somefunc() IRR_OVERRIDE;
 */
 #define IRR_OVERRIDE override
 
-// memory debugging
-#if defined(_DEBUG) && defined(IRRLICHT_EXPORTS) && defined(_MSC_VER) && \
-	(_MSC_VER > 1299) && !defined(IRR_DONT_DO_MEMORY_DEBUGGING_HERE) && !defined(_WIN32_WCE)
-
-	#define CRTDBG_MAP_ALLOC
-	#define _CRTDBG_MAP_ALLOC
-	#define DEBUG_CLIENTBLOCK new( _CLIENT_BLOCK, __FILE__, __LINE__)
-	#include <stdlib.h>
-	#include <crtdbg.h>
-	#define new DEBUG_CLIENTBLOCK
-#endif
-
 //! ignore VC8 warning deprecated
 /** The Microsoft compiler */
 #if defined(_IRR_WINDOWS_API_) && defined(_MSC_VER) && (_MSC_VER >= 1400)
