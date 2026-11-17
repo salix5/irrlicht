@@ -42,14 +42,25 @@ jobs:
           $dxsdkPath = Resolve-Path 'DXSDK'
           "DXSDK_DIR=$($dxsdkPath.ProviderPath)\" | Out-File -FilePath $env:GITHUB_ENV -Append
 
+      - name: Cache vcpkg binary archives
+        uses: actions/cache@v5
+        with:
+          path: ~/AppData/Local/vcpkg/archives
+          key: vcpkg-win-x64-static-md-zlib-libpng-libjpeg-turbo
+
+      - name: Install dependencies via vcpkg
+        run: |
+          vcpkg install zlib:x64-windows-static-md libpng:x64-windows-static-md libjpeg-turbo:x64-windows-static-md
+          vcpkg integrate install
+
       - name: Build Irrlicht DLL
-        run: msbuild source\Irrlicht\Irrlicht17.0.sln /p:Configuration=Release /p:Platform=x64 /m
+        run: msbuild source\Irrlicht\Irrlicht17.0.sln /p:Configuration=Release /p:Platform=x64 /p:VcpkgTriplet=x64-windows-static-md /m
 
       - name: Build Examples
-        run: msbuild examples\BuildAllExamples_vc17.sln /p:Configuration=Release /p:Platform=x64 /m
+        run: msbuild examples\BuildAllExamples_vc17.sln /p:Configuration=Release /p:Platform=x64 /p:VcpkgTriplet=x64-windows-static-md /m
 
       - name: Build Tests
-        run: msbuild tests\tests_vc17.sln /p:Configuration=Release /p:Platform=x64 /m
+        run: msbuild tests\tests_vc17.sln /p:Configuration=Release /p:Platform=x64 /p:VcpkgTriplet=x64-windows-static-md /m
 
       - name: Run Tests
         working-directory: tests
