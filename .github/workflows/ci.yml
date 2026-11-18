@@ -96,7 +96,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgl-dev libxxf86vm-dev libx11-dev libxext-dev libxcursor-dev xvfb gdb
+          sudo apt-get install -y --no-install-recommends libjpeg-dev libpng-dev libgl-dev libxxf86vm-dev libx11-dev libxext-dev libxcursor-dev
 
       - name: Build Irrlicht static library
         run: make -C source/Irrlicht -j$(nproc) NDEBUG=1
@@ -118,6 +118,7 @@ jobs:
           xvfb-run ../bin/Linux/tests 0 19 2>&1 || true
           for corefile in core.*; do
             if [ -f "$corefile" ]; then
+              sudo apt-get install -y --no-install-recommends gdb
               echo "::group::Backtrace from core dump"
               gdb -batch -ex "thread apply all bt full" ../bin/Linux/tests 0 19 "$corefile" 2>&1 || true
               echo "::endgroup::"
