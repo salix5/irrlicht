@@ -18,10 +18,10 @@ all: all_linux
 
 # target specific settings
 all_linux: SYSTEM=Linux
-all_linux: LDFLAGS = -L/usr/X11R6/lib$(LIBSELECT) -L../lib/$(SYSTEM) -lIrrlicht -lGL -lXxf86vm -lX11
+all_linux: LDFLAGS = -L/usr/X11R6/lib$(LIBSELECT) -L../lib/$(SYSTEM) -lIrrlicht -ljpeg -lpng -lz -lGL -lXxf86vm -lX11
 
 all_win32 clean_win32: SYSTEM=Win32-gcc
-all_win32: LDFLAGS = -L../lib/$(SYSTEM) -lIrrlicht -lopengl32 -lm
+all_win32: LDFLAGS = -L../lib/$(SYSTEM) -lIrrlicht -ljpeg -lpng -lz -lopengl32 -lm
 
 all_win32 clean_win32: SUF=.exe
 # name of the binary - only valid for targets which set SYSTEM
