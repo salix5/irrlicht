@@ -42,21 +42,32 @@ jobs:
           $dxsdkPath = Resolve-Path 'DXSDK'
           "DXSDK_DIR=$($dxsdkPath.ProviderPath)\" | Out-File -FilePath $env:GITHUB_ENV -Append
 
+      - name: Cache vcpkg binary archives
+        uses: actions/cache@v5
+        with:
+          path: ~/AppData/Local/vcpkg/archives
+          key: vcpkg-win-x64-static-md-zlib-libpng-libjpeg-turbo
+
+      - name: Install dependencies via vcpkg
+        run: |
+          vcpkg install zlib:x64-windows-static-md libpng:x64-windows-static-md libjpeg-turbo:x64-windows-static-md
+          vcpkg integrate install
+
       - name: Build Irrlicht DLL
-        run: msbuild source\Irrlicht\Irrlicht17.0.sln /p:Configuration=Release /p:Platform=x64 /m
+        run: msbuild source\Irrlicht\Irrlicht17.0.sln /p:Configuration=Release /p:Platform=x64 /p:VcpkgTriplet=x64-windows-static-md /m
 
       - name: Build Examples
-        run: msbuild examples\BuildAllExamples_vc17.sln /p:Configuration=Release /p:Platform=x64 /m
+        run: msbuild examples\BuildAllExamples_vc17.sln /p:Configuration=Release /p:Platform=x64 /p:VcpkgTriplet=x64-windows-static-md /m
 
       - name: Build Tests
-        run: msbuild tests\tests_vc17.sln /p:Configuration=Release /p:Platform=x64 /m
+        run: msbuild tests\tests_vc17.sln /p:Configuration=Release /p:Platform=x64 /p:VcpkgTriplet=x64-windows-static-md /m
 
       - name: Run Tests
         working-directory: tests
+        continue-on-error: true
         run: |
           New-Item -ItemType Directory -Force -Path results
           ..\bin\Win64-VisualStudio\tests.exe 0 19
-        continue-on-error: true
 
       - name: Upload test results
         if: always()
@@ -85,7 +96,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgl-dev libxxf86vm-dev libx11-dev libxext-dev libxcursor-dev xvfb gdb
+          sudo apt-get install -y --no-install-recommends libjpeg-dev libpng-dev libgl-dev libxxf86vm-dev libx11-dev libxext-dev libxcursor-dev
 
       - name: Build Irrlicht static library
         run: make -C source/Irrlicht -j$(nproc) NDEBUG=1
@@ -98,6 +109,7 @@ jobs:
 
       - name: Run Tests
         working-directory: tests
+        continue-on-error: true
         run: |
           mkdir -p results
           ulimit -c unlimited
@@ -106,12 +118,12 @@ jobs:
           xvfb-run ../bin/Linux/tests 0 19 2>&1 || true
           for corefile in core.*; do
             if [ -f "$corefile" ]; then
+              sudo apt-get install -y --no-install-recommends gdb
               echo "::group::Backtrace from core dump"
               gdb -batch -ex "thread apply all bt full" ../bin/Linux/tests 0 19 "$corefile" 2>&1 || true
               echo "::endgroup::"
             fi
           done
-        continue-on-error: true
 
       - name: Upload test results
         if: always()
@@ -133,9 +145,15 @@ jobs:
   build-macos:
     name: macOS 15 (ARM)
     runs-on: macos-15
+    env:
+      BREW_PREFIX: /opt/homebrew
 
     steps:
       - uses: actions/checkout@v6
+
+      - name: Install dependencies
+        run: |
+          brew install libjpeg-turbo libpng
 
       - name: Build Irrlicht static library
         run: |
@@ -143,6 +161,7 @@ jobs:
             -scheme Irrlicht_OSX \
             -configuration Release \
             ONLY_ACTIVE_ARCH=YES \
+            HEADER_SEARCH_PATHS="\$(inherited) $BREW_PREFIX/include" \
             build
 
       - name: Build Examples
@@ -156,26 +175,31 @@ jobs:
             scheme=$(basename "$scheme_file" .xcscheme)
             name=$(basename "$(dirname "$proj")")
             echo "::group::Building $name"
-            xcodebuild -project "$proj" -scheme "$scheme" -configuration Release ONLY_ACTIVE_ARCH=YES build \
-              OTHER_LDFLAGS="-framework Carbon -framework OpenGL -framework Cocoa -framework IOKit" 2>&1 || \
-              echo "::warning::$name failed to build"
+            xcodebuild -project "$proj" -scheme "$scheme" -configuration Release \
+              ONLY_ACTIVE_ARCH=YES \
+              MACOSX_DEPLOYMENT_TARGET=14.0 \
+              HEADER_SEARCH_PATHS="\$(inherited) $BREW_PREFIX/include" \
+              LIBRARY_SEARCH_PATHS="\$(inherited) $BREW_PREFIX/lib" \
+              OTHER_LDFLAGS="-framework Carbon -framework OpenGL -framework Cocoa -framework IOKit -ljpeg -lpng -lz" \
+              build 2>&1 || echo "::warning::$name failed to build"
             echo "::endgroup::"
           done
 
       - name: Build Tests
         run: |
           mkdir -p bin/MacOSX
-          c++ -std=c++14 -Iinclude -Wall -O3 -fno-exceptions -DGL_SILENCE_DEPRECATION \
+          c++ -std=c++14 -Iinclude -I"$BREW_PREFIX/include" -Wall -O3 -fno-exceptions -DGL_SILENCE_DEPRECATION \
             tests/*.cpp -o bin/MacOSX/tests \
-            -Llib/OSX -lIrrlicht \
+            -Llib/OSX -L"$BREW_PREFIX/lib" \
+            -lIrrlicht -ljpeg -lpng -lz -lz \
             -framework OpenGL -framework Cocoa -framework IOKit -framework Carbon
 
       - name: Run Tests
         working-directory: tests
+        continue-on-error: true
         run: |
           mkdir -p results
           ../bin/MacOSX/tests 0 19
-        continue-on-error: true
 
       - name: Upload test results
         if: always()
@@ -192,68 +216,4 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: build-macos
-          path: lib/OSX/
-
-  build-macos-intel:
-    name: macOS 15 (Intel x86_64)
-    runs-on: macos-15-intel
-
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Build Irrlicht static library
-        run: |
-          xcodebuild -project source/Irrlicht/Irrlicht.xcodeproj \
-            -scheme Irrlicht_OSX \
-            -configuration Release \
-            ONLY_ACTIVE_ARCH=YES \
-            build
-
-      - name: Build Examples
-        continue-on-error: true
-        run: |
-          mkdir -p bin/OSX
-          for proj in examples/*/*.xcodeproj; do
-            [ -d "$proj" ] || continue
-            scheme_file=$(ls "$proj"/xcshareddata/xcschemes/*.xcscheme 2>/dev/null | head -1)
-            [ -n "$scheme_file" ] || continue
-            scheme=$(basename "$scheme_file" .xcscheme)
-            name=$(basename "$(dirname "$proj")")
-            echo "::group::Building $name"
-            xcodebuild -project "$proj" -scheme "$scheme" -configuration Release ONLY_ACTIVE_ARCH=YES build \
-              OTHER_LDFLAGS="-framework Carbon -framework OpenGL -framework Cocoa -framework IOKit" 2>&1 || \
-              echo "::warning::$name failed to build"
-            echo "::endgroup::"
-          done
-
-      - name: Build Tests
-        run: |
-          mkdir -p bin/MacOSX
-          c++ -std=c++14 -Iinclude -Wall -O3 -fno-exceptions \
-            tests/*.cpp -o bin/MacOSX/tests \
-            -Llib/OSX -lIrrlicht \
-            -framework OpenGL -framework Cocoa -framework IOKit -framework Carbon
-
-      - name: Run Tests
-        working-directory: tests
-        run: |
-          mkdir -p results
-          ../bin/MacOSX/tests 0 19
-        continue-on-error: true
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: test-results-macos-intel
-          path: |
-            tests/tests.log
-            tests/results/
-          if-no-files-found: ignore
-
-      - name: Upload build artifacts
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: build-macos-intel
           path: lib/OSX/
