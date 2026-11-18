@@ -64,10 +64,10 @@ jobs:
 
       - name: Run Tests
         working-directory: tests
+        continue-on-error: true
         run: |
           New-Item -ItemType Directory -Force -Path results
           ..\bin\Win64-VisualStudio\tests.exe 0 19
-        continue-on-error: true
 
       - name: Upload test results
         if: always()
@@ -109,6 +109,7 @@ jobs:
 
       - name: Run Tests
         working-directory: tests
+        continue-on-error: true
         run: |
           mkdir -p results
           ulimit -c unlimited
@@ -122,7 +123,6 @@ jobs:
               echo "::endgroup::"
             fi
           done
-        continue-on-error: true
 
       - name: Upload test results
         if: always()
@@ -183,10 +183,10 @@ jobs:
 
       - name: Run Tests
         working-directory: tests
+        continue-on-error: true
         run: |
           mkdir -p results
           ../bin/MacOSX/tests 0 19
-        continue-on-error: true
 
       - name: Upload test results
         if: always()
