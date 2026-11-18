@@ -99,7 +99,7 @@ LIB_PATH = ../../lib/$(SYSTEM)
 PREFIX ?= /usr/local
 INSTALL_DIR ?= $(PREFIX)/lib$(LIBSELECT)
 sharedlib install: SHARED_LIB = libIrrlicht.so
-sharedlib: LDFLAGS += -L/usr/X11R6/lib$(LIBSELECT) -lGL -lXxf86vm -lz -lpng -ljpeg
+sharedlib: LDFLAGS += -L/usr/X11R6/lib$(LIBSELECT) -lGL -lXxf86vm -ljpeg -lpng -lz
 staticlib sharedlib: CXXINCS += -I/usr/X11R6/include
 
 #OSX specific options
